@@ -1,4 +1,6 @@
 
+set.seed(1490721)
+
 # Load data and lincomb - omitted for now.
 
 

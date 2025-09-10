@@ -1,4 +1,7 @@
 
+library(stringr)
+
+set.seed(9231864)
 
 # Omit model fitting for now
 
@@ -18,12 +21,15 @@ results.force.year <- samples.force.year.df %>%
   rownames_to_column("iter") %>%
   pivot_longer(starts_with("ethnicity"), names_to = "ethnicity", values_to = "eth_val") %>% 
   pivot_longer(starts_with("interaction(ethnicity, year"), names_to = "ethyear", values_to = "ethyear_val") %>%
-  pivot_longer(starts_with("interaction(ethnicity, force"), names_to = "ethforce", values_to = "ethforce_val") %>%
   mutate(ethnicity =as.integer(str_extract(ethnicity, "\\d")),
-         ethyear = as.integer(str_extract(ethyear, "\\d+")),
-         ethforce = as.integer(str_extract(ethforce, "\\d+"))) %>%
+         ethyear = as.integer(str_extract(ethyear, "\\d+"))) %>%
   filter(
-    ethnicity == (ethyear - 1) %% 3 + 1,
+    ethnicity == (ethyear - 1) %% 3 + 1
+  ) %>%
+  pivot_longer(starts_with("interaction(ethnicity, force"), names_to = "ethforce", values_to = "ethforce_val") %>%
+  mutate(
+    ethforce = as.integer(str_extract(ethforce, "\\d+"))) %>%
+  filter(
     ethnicity == (ethforce - 1) %% 3 + 1
   ) %>%
   mutate(
@@ -157,8 +163,7 @@ exset_df_long <- exset_df %>%
   rownames_to_column("police_force") %>%
   pivot_longer(-police_force, names_to = "year", values_to = "excursion")
 
-exset_yr_area <- full_join(areas %>% st_simplify(preserveTopology=T, dTolerance=2000), 
-                           exset_df_long)
+exset_yr_area <- full_join(areas, exset_df_long)
 
 ggplot(exset_yr_area) + 
   geom_sf(aes(fill = as.logical(excursion))) +
@@ -201,7 +206,7 @@ exset_df_long <- exset_df %>%
   rownames_to_column("police_force") %>%
   pivot_longer(-police_force, names_to = "year", values_to = "excursion")
 
-exset_yr_area <- full_join(areas %>% st_simplify(preserveTopology=T, dTolerance=2000), 
+exset_yr_area <- full_join(areas, 
                            exset_df_long)
 
 ggplot(exset_yr_area) + 
