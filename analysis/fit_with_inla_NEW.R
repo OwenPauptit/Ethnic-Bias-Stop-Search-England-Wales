@@ -9,7 +9,7 @@ library(sf)
 library(patchwork)
 
 
-set.seed(4129264)
+set.seed(41294)
 
 data <- read_csv("data/stopsearch_arrests.csv") %>%
   rownames_to_column("obs") %>%
@@ -17,7 +17,7 @@ data <- read_csv("data/stopsearch_arrests.csv") %>%
     force = factor(police_force),
     ethnicity = factor(officer_defined_ethnicity),
     crime = factor(crime_type),
-    year = factor(previous_financial_year),
+    year = as.integer(substr(previous_financial_year, 1,4)),
     stops = number_of_stops,
     arrests = number_of_arrests,
     obs = factor(obs)
@@ -74,7 +74,7 @@ lincomb <- get.eth.year.lincomb(data)
 model <- inla(stops ~ offset(log(arrests + 0.01)) +
                 f(ethnicity, constr=TRUE) + 
                 f(force, constr=TRUE) + 
-                f(year, model = "rw1", constr=TRUE) +
+                f(year, model = "ar1", constr=TRUE) +
                 f(crime, constr=TRUE) + 
                 f(interaction(ethnicity,year), constr=TRUE) +
                 f(interaction(ethnicity, force), constr=TRUE) +
@@ -154,6 +154,8 @@ compute.ratio.of.sample <- function(sample) {
 
 ratios <- lapply(samples, compute.ratio.of.sample)
 
+rm(samples)
+
 asian.ratios <- do.call(cbind,
                         lapply(ratios, 
                                function(df) df %>% 
@@ -167,14 +169,16 @@ black.ratios <- do.call(cbind,
                                  column_to_rownames("force") %>% 
                                  select(black_log_ratio)))
 
-exset <- excursions.mc(
+rm(ratios)
+
+asian.exset <- excursions.mc(
   asian.ratios,
   alpha = 0.05,
   u = 0,
   type = ">"
 )
 
-asian.forces.exset <- rownames(asian.ratios)[as.logical(exset$E)]
+asian.forces.exset <- rownames(asian.ratios)[as.logical(asian.exset$E)]
 
 black.exset <- excursions.mc(
   black.ratios,
@@ -184,6 +188,11 @@ black.exset <- excursions.mc(
 )
 
 black.forces.exset <- rownames(black.ratios)[as.logical(black.exset$E)]
+
+rm(asian.ratios)
+rm(black.ratios)
+rm(asian.exset)
+rm(black.exset)
 
 run_time <- difftime(Sys.time(), start_time)
 
