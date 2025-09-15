@@ -1,0 +1,92 @@
+---
+title: "Ethnic bias in stop and search"
+output: html_document
+date: "2025-09-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+source("fit_single_model.R")
+source("initial_analysis.R")
+source("excursions_by_year.R")
+source("load_area_data.R")
+source("k_sensitivity.R")
+```
+
+Load the data:
+```{r load-data, echo=FALSE}
+data <- load.stop.search.data()
+areas <- load.areas.data()
+```
+
+Fit the model:
+```{r fit-model}
+set.seed(34982)
+model <- fit.single.model(data)
+```
+
+Temporal Plot:
+```{r plot-temporal}
+plot.temporal(model)
+```
+
+Compute overall excursion sets:
+```{r overall-exset}
+overall.ex.sets <- compute.overall.excursion.sets(model, data)
+
+overall.ex.sets
+```
+
+Plot overall excursion sets:
+```{r plot-exset}
+plot.overall.excursion.sets(overall.ex.sets)
+```
+
+Compute ratios by force and year:
+```{r compute-ratios-by-force-and-year}
+ratios.by.force.and.year <- compute.ratios.over.force.and.year(model)
+```
+
+Compute Asian excursion sets
+```{r compute-asian-excursion-set-by-year}
+asian.excursion.set.by.year <- compute.asian.excursion.sets.by.year(ratios.by.force.and.year)
+```
+
+Plot Asian excursion sets by year:
+```{r}
+plot.excursion.set.by.year(asian.excursion.set.by.year, areas)
+```
+
+Compute Black excursion sets
+```{r compute-black-excursion-set-by-year}
+black.excursion.set.by.year <- compute.black.excursion.sets.by.year(ratios.by.force.and.year)
+```
+
+Plot Black excursion sets by year:
+```{r}
+plot.excursion.set.by.year(black.excursion.set.by.year, areas)
+```
+
+Fit k-models
+```{r k-fits}
+
+ks <- c(0.001, 0.01, 0.1, 1)
+
+k.models <- fit.models.with.varying.k(ks, data)
+```
+
+
+Plot k-models
+```{r plot-k-fits}
+temporal.plot.varying.k(k.models)
+```
+
+Compute k-excursions
+```{r k-excursions}
+k.excursions <- compute.excursion.sets.with.varying.k(k.models, data)
+```
+
+```{r}
+k.excursions
+```

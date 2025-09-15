@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+data
+analysis/analysis_cache
+analysis/analysis_files
