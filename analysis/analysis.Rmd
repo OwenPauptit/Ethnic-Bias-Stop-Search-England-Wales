@@ -90,3 +90,16 @@ k.excursions <- compute.excursion.sets.with.varying.k(k.models, data)
 ```{r}
 k.excursions
 ```
+
+Prior sensitivity
+```{r alt-prior}
+alt.prior <- list(prior = "loggamma", params = c(2, 1))
+
+model.alt.prior <- fit.single.model(data, iid_prior = alt.prior)
+
+plot.temporal(model.alt.prior)
+
+exsets.alt.prior <- compute.overall.excursion.sets(model.alt.prior, data)
+
+plot.overall.excursion.sets(exsets.alt.prior)
+```
