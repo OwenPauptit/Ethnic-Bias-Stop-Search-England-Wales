@@ -11,6 +11,7 @@ source("fit_single_model.R")
 source("initial_analysis.R")
 source("excursions_by_year.R")
 source("load_area_data.R")
+source("prior_sensitivity.R")
 source("k_sensitivity.R")
 ```
 
@@ -70,7 +71,6 @@ plot.excursion.set.by.year(black.excursion.set.by.year, areas)
 
 Fit k-models
 ```{r k-fits}
-
 ks <- c(0.001, 0.01, 0.1, 1)
 
 k.models <- fit.models.with.varying.k(ks, data)

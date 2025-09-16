@@ -3,24 +3,7 @@ source("fit_single_model.R")
 
 
 fit.models.with.varying.k <- function(ks, data) {
-  models.with.varying.k <- lapply(ks, function(k) inla(stops ~ offset(log(arrests + 0.01)) +
-                                          f(ethnicity, constr=TRUE) + 
-                                          f(force, constr=TRUE) + 
-                                          f(year, model = "ar1", constr=TRUE) +
-                                          f(crime, constr=TRUE) + 
-                                          f(interaction(ethnicity,year), constr=TRUE) +
-                                          f(interaction(ethnicity, force), constr=TRUE) +
-                                          f(interaction(force, year), constr=TRUE) +
-                                          f(interaction(crime, ethnicity), constr=TRUE) + 
-                                          f(interaction(crime, year), constr=TRUE) +
-                                          f(interaction(crime, force), constr=TRUE) +
-                                          f(obs, constr=TRUE),
-                                        family = "poisson",
-                                        data = data,
-                                        lincomb = get.eth.year.lincomb(data),
-                                        control.compute = list(config = TRUE),
-                                        control.predictor = list(compute = TRUE)))
-  
+  models.with.varying.k <- lapply(ks, function(k) fit.single.model(data, k = k))
   return(models.with.varying.k)
 }
 

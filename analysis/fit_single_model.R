@@ -90,3 +90,28 @@ fit.single.model <- function(data) {
   return(model)
 }
 
+fit.single.model<- function(data, k = 0.01, time_model = "iid", iid_prior = list(prior = "loggamma", param = c(1, 0.0005))) {
+  
+  lincomb <- get.eth.year.lincomb(data)
+  
+  model <- inla(stops ~ offset(log(arrests + k)) +
+                  f(ethnicity, constr=TRUE, hyper = list(prec = iid_prior)) + 
+                  f(force, constr=TRUE, hyper = list(prec = iid_prior)) + 
+                  f(year, model = time_model, constr=TRUE, hyper = list(prec = iid_prior)) +
+                  f(crime, constr=TRUE, hyper = list(prec = iid_prior)) +
+                  f(interaction(ethnicity,year), constr=TRUE, hyper = list(prec = iid_prior)) +
+                  f(interaction(ethnicity, force), constr=TRUE, hyper = list(prec = iid_prior)) +
+                  f(interaction(force, year), constr=TRUE, hyper = list(prec = iid_prior)) +
+                  f(interaction(crime, ethnicity), constr=TRUE, hyper = list(prec = iid_prior)) +
+                  f(interaction(crime, year), constr=TRUE, hyper = list(prec = iid_prior)) +
+                  f(interaction(crime, force), constr=TRUE, hyper = list(prec = iid_prior)) +
+                  f(obs, constr=TRUE),
+                family = "poisson",
+                data = data,
+                lincomb = lincomb,
+                control.compute = list(config = TRUE),
+                control.predictor = list(compute = TRUE))
+  
+  return(model)
+}
+
