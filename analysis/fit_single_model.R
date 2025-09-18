@@ -65,30 +65,30 @@ get.eth.year.lincomb <- function(data) {
   return( lin.combs.eth.year )
 }
 
-fit.single.model <- function(data) {
-
-  lincomb <- get.eth.year.lincomb(data)
-  
-  model <- inla(stops ~ offset(log(arrests + 0.01)) +
-                  f(ethnicity, constr=TRUE) + 
-                  f(force, constr=TRUE) + 
-                  f(year, model = "ar1", constr=TRUE) +
-                  f(crime, constr=TRUE) + 
-                  f(interaction(ethnicity,year), constr=TRUE) +
-                  f(interaction(ethnicity, force), constr=TRUE) +
-                  f(interaction(force, year), constr=TRUE) +
-                  f(interaction(crime, ethnicity), constr=TRUE) + 
-                  f(interaction(crime, year), constr=TRUE) +
-                  f(interaction(crime, force), constr=TRUE) +
-                  f(obs, constr=TRUE),
-                family = "poisson",
-                data = data,
-                lincomb = lincomb,
-                control.compute = list(config = TRUE),
-                control.predictor = list(compute = TRUE))
-  
-  return(model)
-}
+# fit.single.model <- function(data) {
+# 
+#   lincomb <- get.eth.year.lincomb(data)
+#   
+#   model <- inla(stops ~ offset(log(arrests + 0.01)) +
+#                   f(ethnicity, constr=TRUE) + 
+#                   f(force, constr=TRUE) + 
+#                   f(year, model = "ar1", constr=TRUE) +
+#                   f(crime, constr=TRUE) + 
+#                   f(interaction(ethnicity,year), constr=TRUE) +
+#                   f(interaction(ethnicity, force), constr=TRUE) +
+#                   f(interaction(force, year), constr=TRUE) +
+#                   f(interaction(crime, ethnicity), constr=TRUE) + 
+#                   f(interaction(crime, year), constr=TRUE) +
+#                   f(interaction(crime, force), constr=TRUE) +
+#                   f(obs, constr=TRUE),
+#                 family = "poisson",
+#                 data = data,
+#                 lincomb = lincomb,
+#                 control.compute = list(config = TRUE),
+#                 control.predictor = list(compute = TRUE))
+#   
+#   return(model)
+# }
 
 fit.single.model<- function(data, k = 0.01, time_model = "iid", iid_prior = list(prior = "loggamma", param = c(1, 0.0005))) {
   

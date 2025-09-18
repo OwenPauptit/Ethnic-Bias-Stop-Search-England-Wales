@@ -105,6 +105,31 @@ exsets.alt.prior <- compute.overall.excursion.sets(model.alt.prior, data)
 plot.overall.excursion.sets(exsets.alt.prior)
 ```
 
+
+RW1:
+```{r rw1,results='hide',fig.keep='all'}
+
+model.rw1 <- fit.single.model(data, time_model="rw1")
+
+plot.temporal(model.rw1)
+
+exsets.rw1 <- compute.overall.excursion.sets(model.rw1, data)
+
+plot.overall.excursion.sets(exsets.rw1)
+```
+
+AR1:
+```{r ar1,results='hide',fig.keep='all'}
+
+model.ar1 <- fit.single.model(data, time_model="ar1")
+
+plot.temporal(model.ar1)
+
+exsets.ar1 <- compute.overall.excursion.sets(model.ar1, data)
+
+plot.overall.excursion.sets(exsets.ar1)
+```
+
 Posterior predictive checks
 ```{r post-pred-checks,results='hide',fig.keep='all'}
 replicates <- compute.replicates(model, data)
@@ -141,4 +166,9 @@ ggplot(epsilon.df, aes(x = year, y = epsilon, colour = str_to_title(crime), line
     colour = "Crime type",
     linetype = "Ethnicity"
   )
+```
+
+
+```{r}
+model$summary.hyperpar
 ```
