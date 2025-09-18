@@ -17,7 +17,7 @@ source("posterior_predictive_checks.R")
 ```
 
 Load the data:
-```{r load-data, echo=FALSE}
+```{r load-data,results='hide',fig.keep='all'}
 data <- load.stop.search.data()
 areas <- load.areas.data()
 ```
@@ -29,24 +29,24 @@ model <- fit.single.model(data)
 ```
 
 Temporal Plot:
-```{r plot-temporal}
+```{r plot-temporal,results='hide',fig.keep='all'}
 plot.temporal(model)
 ```
 
 Compute overall excursion sets:
-```{r overall-exset}
+```{r overall-exset,results='hide',fig.keep='all'}
 overall.ex.sets <- compute.overall.excursion.sets(model, data)
 
 overall.ex.sets
 ```
 
 Plot overall excursion sets:
-```{r plot-exset}
+```{r plot-exset,results='hide',fig.keep='all'}
 plot.overall.excursion.sets(overall.ex.sets)
 ```
 
 Compute ratios by force and year:
-```{r compute-ratios-by-force-and-year}
+```{r compute-ratios-by-force-and-year,results='hide',fig.keep='all'}
 ratios.by.force.and.year <- compute.ratios.over.force.and.year(model)
 ```
 
@@ -56,7 +56,7 @@ asian.excursion.set.by.year <- compute.asian.excursion.sets.by.year(ratios.by.fo
 ```
 
 Plot Asian excursion sets by year:
-```{r}
+```{r,results='hide',fig.keep='all'}
 plot.excursion.set.by.year(asian.excursion.set.by.year, areas)
 ```
 
@@ -66,12 +66,12 @@ black.excursion.set.by.year <- compute.black.excursion.sets.by.year(ratios.by.fo
 ```
 
 Plot Black excursion sets by year:
-```{r}
+```{r,results='hide',fig.keep='all'}
 plot.excursion.set.by.year(black.excursion.set.by.year, areas)
 ```
 
 Fit k-models
-```{r k-fits}
+```{r k-fits,results='hide',fig.keep='all'}
 ks <- c(0.001, 0.01, 0.1, 1)
 
 k.models <- fit.models.with.varying.k(ks, data)
@@ -79,12 +79,12 @@ k.models <- fit.models.with.varying.k(ks, data)
 
 
 Plot k-models
-```{r plot-k-fits}
+```{r plot-k-fits,results='hide',fig.keep='all'}
 temporal.plot.varying.k(k.models)
 ```
 
 Compute k-excursions
-```{r k-excursions}
+```{r k-excursions,results='hide',fig.keep='all'}
 k.excursions <- compute.excursion.sets.with.varying.k(k.models, data)
 ```
 
@@ -93,7 +93,7 @@ k.excursions
 ```
 
 Prior sensitivity
-```{r alt-prior}
+```{r alt-prior,results='hide',fig.keep='all'}
 alt.prior <- list(prior = "loggamma", params = c(2, 1))
 
 model.alt.prior <- fit.single.model(data, iid_prior = alt.prior)
@@ -106,8 +106,39 @@ plot.overall.excursion.sets(exsets.alt.prior)
 ```
 
 Posterior predictive checks
-```{r post-pred-checks}
+```{r post-pred-checks,results='hide',fig.keep='all'}
 replicates <- compute.replicates(model, data)
 plot.posterior.predictive.check(replicates)
 ```
 
+```{r,results='hide',fig.keep='all'}
+
+plot(model$summary.random$obs$mean, xlim=c(1100, 1200))
+
+data[1100:1200,]$force
+
+epsilons <- model$summary.random$obs %>%
+  mutate(ID = as.integer(ID)) %>%
+  arrange(ID) %>%
+  select(mean)
+
+epsilon.df <- data.frame(
+  epsilon = epsilons[which(data$force == "lancashire"), ],
+  ethnicity = data$ethnicity[which(data$force == "lancashire")],
+  year = data$year[which(data$force == "lancashire")],
+  crime = data$crime[which(data$force == "lancashire")]
+) %>%
+  mutate(
+    year = as.integer(substr(year, 1, 4)) + 1
+  )
+
+ggplot(epsilon.df, aes(x = year, y = epsilon, colour = str_to_title(crime), linetype = str_to_title(ethnicity))) +
+  geom_line() +
+  theme_classic() +
+  labs(
+    x = "Financial year beginning",
+    y = "Posterior mean of epsilon",
+    colour = "Crime type",
+    linetype = "Ethnicity"
+  )
+```

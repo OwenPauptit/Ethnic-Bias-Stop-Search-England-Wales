@@ -16,7 +16,7 @@ compute.replicates <- function(model, data) {
 
 plot.posterior.predictive.check <- function(replicates) {
   
-  post.pred <- as.data.frame(reps) %>%
+  post.pred <- as.data.frame(replicates) %>%
   rownames_to_column("iter") %>%
   pivot_longer(-iter, names_to = "y_rep_idx", values_to = "y_rep") %>%
   group_by(iter) %>%
