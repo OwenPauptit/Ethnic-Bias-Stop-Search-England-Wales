@@ -92,7 +92,6 @@ compute.overall.excursion.sets <- function(model, data ) {
   )
   
   
-  asian.forces.exset <- rownames(asian.ratios)[as.logical(asian.exset$E)]
   
   print("Computing Black excursion set...")
   black.exset <- excursions.mc(
@@ -102,17 +101,22 @@ compute.overall.excursion.sets <- function(model, data ) {
     type = ">"
   )
   
-  black.forces.exset <- rownames(black.ratios)[as.logical(black.exset$E)]
+  return(list(asian.M = asian.exset$M,
+              black.M = asian.exset$M))
   
-  return(list(excursion.set.asian = asian.forces.exset,
-              excursion.set.black = black.forces.exset))
+  return(list(asian.upr = rownames(asian.ratios)[asian.exset$M == 1],
+              asian.lwr = rownames(asian.ratios)[asian.exset$M == 0],
+              black.upr = rownames(asian.ratios)[black.exset$M == 1],
+              black.lwr = rownames(asian.ratios)[black.exset$M == 0]))
 }
 
-plot.overall.excursion.sets <- function(excursion.sets) {
+plot.overall.excursion.sets <- function(excursion.sets, areas) {
   
   p1 <- areas %>%
     mutate(
-      excursion = police_force %in% excursion.sets$excursion.set.asian
+      excursion.upr = police_force %in% excursion.sets$asian.upr,
+      excursion.lwr = police_force %in% excursion.sets$asian.lwr,
+      excursion = excursion.upr - excursion.lwr
     ) %>%
     ggplot() +
     geom_sf(aes(fill = excursion)) +
@@ -123,12 +127,14 @@ plot.overall.excursion.sets <- function(excursion.sets) {
           legend.position = "none",
           strip.background = element_blank(),
           strip.text = element_text(size = rel(1.0), colour = "black")) +
-    scale_fill_manual(values = c("white", "red")) +
+    scale_fill_manual(values = c("blue", "white", "red")) +
     ggtitle("Asian")
   
   p2 <- areas %>%
     mutate(
-      excursion = police_force %in% excursion.sets$excursion.set.black
+      excursion.upr = police_force %in% excursion.sets$asian.upr,
+      excursion.lwr = police_force %in% excursion.sets$asian.lwr,
+      excursion = excursion.upr - excursion.lwr
     ) %>%
     ggplot() +
     geom_sf(aes(fill = excursion)) +
@@ -139,7 +145,7 @@ plot.overall.excursion.sets <- function(excursion.sets) {
           legend.position = "none",
           strip.background = element_blank(),
           strip.text = element_text(size = rel(1.0), colour = "black")) +
-    scale_fill_manual(values = c("white", "red")) +
+    scale_fill_manual(values = c("blue", "white", "red")) +
     ggtitle("Black")
   
   return(p1+p2)
