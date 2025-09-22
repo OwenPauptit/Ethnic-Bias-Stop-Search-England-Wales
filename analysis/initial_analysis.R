@@ -101,9 +101,6 @@ compute.overall.excursion.sets <- function(model, data ) {
     type = ">"
   )
   
-  return(list(asian.M = asian.exset$M,
-              black.M = asian.exset$M))
-  
   return(list(asian.upr = rownames(asian.ratios)[asian.exset$M == 1],
               asian.lwr = rownames(asian.ratios)[asian.exset$M == 0],
               black.upr = rownames(asian.ratios)[black.exset$M == 1],
@@ -116,7 +113,7 @@ plot.overall.excursion.sets <- function(excursion.sets, areas) {
     mutate(
       excursion.upr = police_force %in% excursion.sets$asian.upr,
       excursion.lwr = police_force %in% excursion.sets$asian.lwr,
-      excursion = excursion.upr - excursion.lwr
+      excursion = as.factor(excursion.upr - excursion.lwr)
     ) %>%
     ggplot() +
     geom_sf(aes(fill = excursion)) +
@@ -127,14 +124,14 @@ plot.overall.excursion.sets <- function(excursion.sets, areas) {
           legend.position = "none",
           strip.background = element_blank(),
           strip.text = element_text(size = rel(1.0), colour = "black")) +
-    scale_fill_manual(values = c("blue", "white", "red")) +
+    scale_fill_manual(values = c("blue", "white", "red"), breaks = -1:1) +
     ggtitle("Asian")
   
   p2 <- areas %>%
     mutate(
-      excursion.upr = police_force %in% excursion.sets$asian.upr,
-      excursion.lwr = police_force %in% excursion.sets$asian.lwr,
-      excursion = excursion.upr - excursion.lwr
+      excursion.upr = police_force %in% excursion.sets$black.upr,
+      excursion.lwr = police_force %in% excursion.sets$black.lwr,
+      excursion = as.factor(excursion.upr - excursion.lwr)
     ) %>%
     ggplot() +
     geom_sf(aes(fill = excursion)) +
@@ -145,7 +142,7 @@ plot.overall.excursion.sets <- function(excursion.sets, areas) {
           legend.position = "none",
           strip.background = element_blank(),
           strip.text = element_text(size = rel(1.0), colour = "black")) +
-    scale_fill_manual(values = c("blue", "white", "red")) +
+    scale_fill_manual(values = c("blue", "white", "red"), breaks = -1:1) +
     ggtitle("Black")
   
   return(p1+p2)

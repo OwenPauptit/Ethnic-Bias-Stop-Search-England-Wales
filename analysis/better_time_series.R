@@ -24,4 +24,9 @@ model <- model.2
 
 exsets <- compute.overall.excursion.sets(model, data)
 
-plot.overall.excursion.sets(exsets)
+plot.overall.excursion.sets(exsets, areas)
+
+exsets
+
+
+library(sf)
