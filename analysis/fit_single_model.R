@@ -8,19 +8,29 @@ library(excursions)
 library(sf)
 library(patchwork)
 
+ethnicity.indices <- c(asian = 1, black = 2, white = 3)
+
 load.stop.search.data <- function() {
   return(read_csv("../data/stopsearch_arrests.csv") %>%
-  rownames_to_column("obs") %>%
-  mutate(
-    force = factor(police_force),
-    ethnicity = factor(officer_defined_ethnicity),
-    crime = factor(crime_type),
-    year = as.integer(substr(previous_financial_year, 1,4)),
-    stops = number_of_stops,
-    arrests = number_of_arrests,
-    obs = factor(obs)
-  ) %>%
-  select(ethnicity, force, crime, year, stops, arrests, obs))
+           rownames_to_column("obs") %>%
+           mutate(
+             force = factor(police_force),
+             ethnicity = factor(officer_defined_ethnicity),
+             crime = factor(crime_type),
+             year = as.integer(substr(previous_financial_year, 1,4)),
+             stops = number_of_stops,
+             arrests = number_of_arrests,
+             obs = factor(obs)
+           ) %>%
+           select(ethnicity, force, crime, year, stops, arrests, obs) %>%
+           mutate(
+             force.idx = as.numeric(force),
+             ethnicity.idx = ethnicity.indices[ethnicity],
+             crime.idx = as.numeric(crime),
+             yyear = year,
+             yyyear = year,
+             yyyyear = year
+           ))
 }
 
 # Code to create weights to compute ratios (beta_E + beta_E,T - beta_White - beta_White,T)
@@ -59,58 +69,38 @@ get.eth.year.lincomb <- function(data) {
   
   lin.combs.eth.year <- inla.make.lincombs(
     ethnicity = weights.eth,
-    `interaction(ethnicity, year)` = weights.eth.year
+    yyear = weights.eth.year
   )
   
   return( lin.combs.eth.year )
 }
 
-# fit.single.model <- function(data) {
-# 
-#   lincomb <- get.eth.year.lincomb(data)
-#   
-#   model <- inla(stops ~ offset(log(arrests + 0.01)) +
-#                   f(ethnicity, constr=TRUE) + 
-#                   f(force, constr=TRUE) + 
-#                   f(year, model = "ar1", constr=TRUE) +
-#                   f(crime, constr=TRUE) + 
-#                   f(interaction(ethnicity,year), constr=TRUE) +
-#                   f(interaction(ethnicity, force), constr=TRUE) +
-#                   f(interaction(force, year), constr=TRUE) +
-#                   f(interaction(crime, ethnicity), constr=TRUE) + 
-#                   f(interaction(crime, year), constr=TRUE) +
-#                   f(interaction(crime, force), constr=TRUE) +
-#                   f(obs, constr=TRUE),
-#                 family = "poisson",
-#                 data = data,
-#                 lincomb = lincomb,
-#                 control.compute = list(config = TRUE),
-#                 control.predictor = list(compute = TRUE))
-#   
-#   return(model)
-# }
-
-fit.single.model<- function(data, k = 0.01, time_model = "iid", iid_prior = list(prior = "loggamma", param = c(1, 0.0005))) {
+fit.single.model<- function(data, 
+                            k = 0.01, 
+                            prec.prior = list(prec = list(prior = "pc.prec", param = c(1, 0.5))),
+                            ar.prior = list(prec = list(prior = "pc.prec", param = c(1, 0.5)),
+                                            rho = list(prior = "pc.cor0", param = c(0.5, 0.1)))) {
   
   lincomb <- get.eth.year.lincomb(data)
   
-  model <- inla(stops ~ offset(log(arrests + k)) +
-                  f(ethnicity, constr=TRUE, hyper = list(prec = iid_prior)) + 
-                  f(force, constr=TRUE, hyper = list(prec = iid_prior)) + 
-                  f(year, model = time_model, constr=TRUE, hyper = list(prec = iid_prior)) +
-                  f(crime, constr=TRUE, hyper = list(prec = iid_prior)) +
-                  f(interaction(ethnicity,year), constr=TRUE, hyper = list(prec = iid_prior)) +
-                  f(interaction(ethnicity, force), constr=TRUE, hyper = list(prec = iid_prior)) +
-                  f(interaction(force, year), constr=TRUE, hyper = list(prec = iid_prior)) +
-                  f(interaction(crime, ethnicity), constr=TRUE, hyper = list(prec = iid_prior)) +
-                  f(interaction(crime, year), constr=TRUE, hyper = list(prec = iid_prior)) +
-                  f(interaction(crime, force), constr=TRUE, hyper = list(prec = iid_prior)) +
-                  f(obs, constr=TRUE),
-                family = "poisson",
+  model <- inla(stops ~
+                  f(ethnicity, constr=T, hyper = prec.prior) + 
+                  f(force, constr=T, hyper = prec.prior) + 
+                  f(crime, constr=T, hyper = prec.prior) +
+                  f(year, model = "ar1", constr=T, hyper = ar.prior) +
+                  f(yyear, model = "ar1", group = ethnicity.idx, constr=T, hyper = ar.prior) +
+                  f(yyyear, model = "ar1", group = force.idx, constr=T, hyper = ar.prior) +
+                  f(yyyyear, model = "ar1", group = crime.idx, constr=T, hyper = ar.prior) +
+                  f(interaction(ethnicity, force), constr=T, hyper = prec.prior) +
+                  f(interaction(force, crime), constr=T, hyper = prec.prior) + 
+                  f(interaction(ethnicity, crime), constr=T, hyper = prec.prior) +
+                  f(obs, constr=T, hyper = prec.prior),
                 data = data,
+                family = "poisson",
+                E = arrests+k,
                 lincomb = lincomb,
-                control.compute = list(config = TRUE),
-                control.predictor = list(compute = TRUE))
+                control.compute = list(config=T),
+                control.predictor = list(compute = T))
   
   return(model)
 }
