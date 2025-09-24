@@ -25,19 +25,19 @@ ar.prior <- function(sigma, sigma.alpha, rho, rho.alpha, base.rho.zero = T) {
 fit.models.sensitivity.pc.cor0 <- function(data) {
   
   alpha <- 0.9
-  sigmas <- c(0.01, 10, 1000)
+  sigmas <- c(0.1, 10, 100)
   rhos <- c(0.1, 0.5, 0.9)
-  
-  priors.list <- lapply(1:3, 
+
+  priors.list <- lapply(1:3,
                         function(idx) list(
                           iid = iid.prior(sigmas[idx], alpha),
                           ar = ar.prior(sigmas[idx], alpha, rhos[idx], alpha)
                         ))
-  
-  models <- lapply(priors.list, 
+
+  models <- lapply(priors.list,
                    function(priors)
                      fit.single.model(data, prec.prior = priors$iid, ar.prior = priors$ar))
-  
+
   return(models)
 }
 

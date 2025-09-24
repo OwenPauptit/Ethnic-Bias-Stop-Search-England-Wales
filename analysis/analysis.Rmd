@@ -42,95 +42,99 @@ overall.ex.sets
 
 Plot overall excursion sets:
 ```{r plot-exset,results='hide',fig.keep='all'}
-plot.overall.excursion.sets(overall.ex.sets)
+plot.overall.excursion.sets(overall.ex.sets, areas)
 ```
 
-Compute ratios by force and year:
-```{r compute-ratios-by-force-and-year,results='hide',fig.keep='all'}
-ratios.by.force.and.year <- compute.ratios.over.force.and.year(model)
-```
+<!-- Compute ratios by force and year: -->
+<!-- ```{r compute-ratios-by-force-and-year,results='hide',fig.keep='all'} -->
+<!-- ratios.by.force.and.year <- compute.ratios.over.force.and.year(model) -->
+<!-- ``` -->
 
-Compute Asian excursion sets
-```{r compute-asian-excursion-set-by-year}
-asian.excursion.set.by.year <- compute.asian.excursion.sets.by.year(ratios.by.force.and.year)
-```
+<!-- Compute Asian excursion sets -->
+<!-- ```{r compute-asian-excursion-set-by-year} -->
+<!-- asian.excursion.set.by.year <- compute.asian.excursion.sets.by.year(ratios.by.force.and.year) -->
+<!-- ``` -->
 
-Plot Asian excursion sets by year:
-```{r,results='hide',fig.keep='all'}
-plot.excursion.set.by.year(asian.excursion.set.by.year, areas)
-```
+<!-- Plot Asian excursion sets by year: -->
+<!-- ```{r,results='hide',fig.keep='all'} -->
+<!-- plot.excursion.set.by.year(asian.excursion.set.by.year, areas) -->
+<!-- ``` -->
 
-Compute Black excursion sets
-```{r compute-black-excursion-set-by-year}
-black.excursion.set.by.year <- compute.black.excursion.sets.by.year(ratios.by.force.and.year)
-```
+<!-- Compute Black excursion sets -->
+<!-- ```{r compute-black-excursion-set-by-year} -->
+<!-- black.excursion.set.by.year <- compute.black.excursion.sets.by.year(ratios.by.force.and.year) -->
+<!-- ``` -->
 
-Plot Black excursion sets by year:
-```{r,results='hide',fig.keep='all'}
-plot.excursion.set.by.year(black.excursion.set.by.year, areas)
-```
+<!-- Plot Black excursion sets by year: -->
+<!-- ```{r,results='hide',fig.keep='all'} -->
+<!-- plot.excursion.set.by.year(black.excursion.set.by.year, areas) -->
+<!-- ``` -->
 
-Fit k-models
-```{r k-fits,results='hide',fig.keep='all'}
-ks <- c(0.001, 0.01, 0.1, 1)
+<!-- Fit k-models -->
+<!-- ```{r k-fits,results='hide',fig.keep='all'} -->
+<!-- ks <- c(0.001, 0.01, 0.1, 1) -->
 
-k.models <- fit.models.with.varying.k(ks, data)
-```
-
-
-Plot k-models
-```{r plot-k-fits,results='hide',fig.keep='all'}
-temporal.plot.varying.k(k.models)
-```
-
-Compute k-excursions
-```{r k-excursions,results='hide',fig.keep='all'}
-k.excursions <- lapply(k.models, function(model) compute.overall.excursion.sets(model, data))
-k.excursions
-```
-
-Prior sensitivity
-```{r alt-prior,results='hide',fig.keep='all'}
-alt.prior <- list(prior = "loggamma", params = c(2, 1))
-
-model.alt.prior <- fit.single.model(data, iid_prior = alt.prior)
-
-plot.temporal(model.alt.prior)
-
-exsets.alt.prior <- compute.overall.excursion.sets(model.alt.prior, data)
-
-plot.overall.excursion.sets(exsets.alt.prior)
-```
+<!-- k.models <- fit.models.with.varying.k(ks, data) -->
+<!-- ``` -->
 
 
-RW1:
-```{r rw1,results='hide',fig.keep='all'}
+<!-- Plot k-models -->
+<!-- ```{r plot-k-fits,results='hide',fig.keep='all'} -->
+<!-- temporal.plot.varying.k(k.models) -->
+<!-- ``` -->
 
-model.rw1 <- fit.single.model(data, time_model="rw1")
+<!-- Compute k-excursions -->
+<!-- ```{r k-excursions,results='hide',fig.keep='all'} -->
+<!-- k.excursions <- lapply(k.models, function(model) compute.overall.excursion.sets(model, data)) -->
+<!-- k.excursions -->
+<!-- ``` -->
 
-plot.temporal(model.rw1)
+<!-- Prior sensitivity -->
+<!-- ```{r alt-prior,results='hide',fig.keep='all'} -->
+<!-- alt.prior <- list(prior = "loggamma", params = c(2, 1)) -->
 
-exsets.rw1 <- compute.overall.excursion.sets(model.rw1, data)
+<!-- model.alt.prior <- fit.single.model(data, iid_prior = alt.prior) -->
 
-plot.overall.excursion.sets(exsets.rw1)
-```
+<!-- plot.temporal(model.alt.prior) -->
 
-AR1:
-```{r ar1,results='hide',fig.keep='all'}
+<!-- exsets.alt.prior <- compute.overall.excursion.sets(model.alt.prior, data) -->
 
-model.ar1 <- fit.single.model(data, time_model="ar1")
+<!-- plot.overall.excursion.sets(exsets.alt.prior, areas) -->
+<!-- ``` -->
 
-plot.temporal(model.ar1)
 
-exsets.ar1 <- compute.overall.excursion.sets(model.ar1, data)
+<!-- RW1: -->
+<!-- ```{r rw1,results='hide',fig.keep='all'} -->
 
-plot.overall.excursion.sets(exsets.ar1)
-```
+<!-- model.rw1 <- fit.single.model(data, time_model="rw1") -->
+
+<!-- plot.temporal(model.rw1) -->
+
+<!-- exsets.rw1 <- compute.overall.excursion.sets(model.rw1, data) -->
+
+<!-- plot.overall.excursion.sets(exsets.rw1, areas) -->
+<!-- ``` -->
+
+<!-- AR1: -->
+<!-- ```{r ar1,results='hide',fig.keep='all'} -->
+
+<!-- model.ar1 <- fit.single.model(data, time_model="ar1") -->
+
+<!-- plot.temporal(model.ar1) -->
+
+<!-- exsets.ar1 <- compute.overall.excursion.sets(model.ar1, data) -->
+
+<!-- plot.overall.excursion.sets(exsets.ar1, areas) -->
+<!-- ``` -->
 
 Posterior predictive checks
 ```{r post-pred-checks,results='hide',fig.keep='all'}
 replicates <- compute.replicates(model, data)
 plot.posterior.predictive.check(replicates)
+```
+
+```{r}
+summary(as.vector(as.matrix(replicates)))
 ```
 
 ```{r,results='hide',fig.keep='all'}

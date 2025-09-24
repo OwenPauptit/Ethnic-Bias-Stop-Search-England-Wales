@@ -84,7 +84,7 @@ fit.single.model<- function(data,
   
   lincomb <- get.eth.year.lincomb(data)
   
-  model <- inla(stops ~
+  model <- inla(stops ~ offset(log(arrests + k)) + # ugly to have it here but makes posterior predictive checks easier
                   f(ethnicity, constr=T, hyper = prec.prior) + 
                   f(force, constr=T, hyper = prec.prior) + 
                   f(crime, constr=T, hyper = prec.prior) +
@@ -98,7 +98,7 @@ fit.single.model<- function(data,
                   f(obs, constr=T, hyper = prec.prior),
                 data = data,
                 family = "poisson",
-                E = arrests+k,
+                # E = arrests+k,   # prettier place to have offset
                 lincomb = lincomb,
                 control.compute = list(config=T),
                 control.predictor = list(compute = T))
