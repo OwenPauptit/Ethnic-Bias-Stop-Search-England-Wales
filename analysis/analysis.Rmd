@@ -85,10 +85,7 @@ temporal.plot.varying.k(k.models)
 
 Compute k-excursions
 ```{r k-excursions,results='hide',fig.keep='all'}
-k.excursions <- compute.excursion.sets.with.varying.k(k.models, data)
-```
-
-```{r}
+k.excursions <- lapply(k.models, function(model) compute.overall.excursion.sets(model, data))
 k.excursions
 ```
 
@@ -171,4 +168,9 @@ ggplot(epsilon.df, aes(x = year, y = epsilon, colour = str_to_title(crime), line
 
 ```{r}
 model$summary.hyperpar
+```
+
+```{r}
+models <- fit.models.sensitivity.pc.cor0(data)
+excursion.sets <- lapply(models, function(model) compute.overall.excursion.sets(model, data))
 ```

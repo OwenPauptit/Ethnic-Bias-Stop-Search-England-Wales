@@ -1,4 +1,5 @@
-source("analysis/fit_single_model.R")
+# source("analysis/fit_single_model.R")
+# source("analysis/initial_analysis.R")
 
 pc.prec <- function(sigma, alpha) {
   return(list(prior = "pc.prec", param = c(sigma, alpha)))
@@ -39,7 +40,8 @@ fit.models.sensitivity.pc.cor0 <- function(data) {
   
   return(models)
 }
-models <- fit.models.sensitivity.pc.cor0(data
-                                        )
+
+
+
 
 

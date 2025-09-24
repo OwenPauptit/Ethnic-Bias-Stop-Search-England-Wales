@@ -7,6 +7,7 @@ library(ggplot2)
 library(excursions)
 library(sf)
 library(patchwork)
+library(stringr)
 
 ethnicity.indices <- c(asian = 1, black = 2, white = 3)
 
