@@ -98,7 +98,7 @@ fit.single.model<- function(data,
                   f(obs, constr=T, hyper = prec.prior),
                 data = data,
                 family = "poisson",
-                # E = arrests+k,   # prettier place to have offset
+                # E = arrests+k,   # prettier place to have offset, but makes posterior predictive checks more complicated
                 lincomb = lincomb,
                 control.compute = list(config=T),
                 control.predictor = list(compute = T))

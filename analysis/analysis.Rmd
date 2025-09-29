@@ -178,3 +178,8 @@ model$summary.hyperpar
 models <- fit.models.sensitivity.pc.cor0(data)
 excursion.sets <- lapply(models, function(model) compute.overall.excursion.sets(model, data))
 ```
+
+
+```{r}
+excursion.sets
+```

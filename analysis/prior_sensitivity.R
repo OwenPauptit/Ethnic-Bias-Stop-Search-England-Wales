@@ -11,10 +11,10 @@ iid.prior <- function(sigma, alpha) {
 
 ar.prior <- function(sigma, sigma.alpha, rho, rho.alpha, base.rho.zero = T) {
   if (base.rho.zero) {
-    return(list(prec = pc.prec(sigma, alpha),
+    return(list(prec = pc.prec(sigma, sigma.alpha),
                 rho = list(prior = "pc.cor0", param = c(rho, rho.alpha))))
   }
-  return(list(prec = pc.prec(sigma, alpha),
+  return(list(prec = pc.prec(sigma, sigma.alpha),
               rho = list(prior = "pc.cor1", param = c(rho, rho.alpha))))
 }
 
