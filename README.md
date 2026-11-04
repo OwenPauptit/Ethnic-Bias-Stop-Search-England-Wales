@@ -7,13 +7,13 @@ The data were retrieved from: https://data.police.uk/ (stop and search, force bo
 
 ## Cleaning
 
-The data were cleaned with the filed available in /cleaning, in the following order:
+The data were cleaned with the code files in `/cleaning`, in the following order:
 
- 1. clean_arrests_data.R, clean_census_data.R, clean_maps_data.R, clean_stopsearch_data.R
+ 1. `clean_arrests_data.R`, `clean_census_data.R`, `clean_maps_data.R`, `clean_stopsearch_data.R`
  
- 2. merge_cleaned_data.R
+ 2. `merge_cleaned_data.R`
  
- 3. remove_forces_with_missing_data.R
+ 3. `remove_forces_with_missing_data.R`
 
 ## Analysis
 
