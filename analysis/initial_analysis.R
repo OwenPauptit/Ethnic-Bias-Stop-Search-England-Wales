@@ -88,7 +88,7 @@ compute.overall.excursion.sets <- function(model, data ) {
     asian.ratios,
     alpha = 0.05,
     u = 0,
-    type = ">"
+    type = "!="
   )
   
   
@@ -98,13 +98,17 @@ compute.overall.excursion.sets <- function(model, data ) {
     black.ratios,
     alpha = 0.05,
     u = 0,
-    type = ">"
+    type = "!="
   )
   
   return(list(asian.upr = rownames(asian.ratios)[asian.exset$M == 1],
               asian.lwr = rownames(asian.ratios)[asian.exset$M == 0],
               black.upr = rownames(asian.ratios)[black.exset$M == 1],
-              black.lwr = rownames(asian.ratios)[black.exset$M == 0]))
+              black.lwr = rownames(asian.ratios)[black.exset$M == 0],
+              asian.F = asian.exset$F,
+              black.F = black.exset$F,
+              asian.ratios = asian.ratios,
+              black.ratios = black.ratios))
 }
 
 plot.overall.excursion.sets <- function(excursion.sets, areas) {

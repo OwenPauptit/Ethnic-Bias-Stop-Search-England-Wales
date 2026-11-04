@@ -14,6 +14,7 @@ source("load_area_data.R")
 source("prior_sensitivity.R")
 source("k_sensitivity.R")
 source("posterior_predictive_checks.R")
+source("fit_age_model.R")
 ```
 
 Load the data:
@@ -33,10 +34,20 @@ Temporal Plot:
 plot.temporal(model)
 ```
 
+```{r save-temporal-plot, results='hide'}
+plot.temporal(model)
+
+ggsave("posterior_ratio_plot.pdf", width=6, height=3, units="in")
+```
+
 Compute overall excursion sets:
 ```{r overall-exset,results='hide',fig.keep='all'}
 overall.ex.sets <- compute.overall.excursion.sets(model, data)
 
+(overall.ex.sets)
+```
+
+```{r}
 overall.ex.sets
 ```
 
@@ -45,136 +56,144 @@ Plot overall excursion sets:
 plot.overall.excursion.sets(overall.ex.sets, areas)
 ```
 
-<!-- Compute ratios by force and year: -->
-<!-- ```{r compute-ratios-by-force-and-year,results='hide',fig.keep='all'} -->
-<!-- ratios.by.force.and.year <- compute.ratios.over.force.and.year(model) -->
-<!-- ``` -->
+Marginal probabilities of stopping ethnic minorities more than wHITE PEOPLE
+```{r plot-marg-probs, results='hide', fig.keep='all', echo=F}
+plot.marginal.probabilities <- function(marg.probs, areas) {
+  
+  areas$prob <- marg.probs[areas$police_force]
+  
+  ggplot(areas) +
+    geom_sf(aes(fill = prob)) +
+  scale_fill_gradient2(low="blue",mid="white", high="red", name="Marginal probability", limits=c(0,1), midpoint=0.5) +
+  theme_classic() +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(size = rel(1.0), colour = "black"))
+}
 
-<!-- Compute Asian excursion sets -->
-<!-- ```{r compute-asian-excursion-set-by-year} -->
-<!-- asian.excursion.set.by.year <- compute.asian.excursion.sets.by.year(ratios.by.force.and.year) -->
-<!-- ``` -->
+asian.probs <- rowMeans(overall.ex.sets$asian.ratios > 0)
+black.probs <- rowMeans(overall.ex.sets$black.ratios > 0)
 
-<!-- Plot Asian excursion sets by year: -->
-<!-- ```{r,results='hide',fig.keep='all'} -->
-<!-- plot.excursion.set.by.year(asian.excursion.set.by.year, areas) -->
-<!-- ``` -->
+plot.marginal.probabilities(asian.probs, areas) + ggtitle("A") +
+  plot.marginal.probabilities(black.probs, areas) + ggtitle("B") +
+  plot_layout(guides="collect") 
 
-<!-- Compute Black excursion sets -->
-<!-- ```{r compute-black-excursion-set-by-year} -->
-<!-- black.excursion.set.by.year <- compute.black.excursion.sets.by.year(ratios.by.force.and.year) -->
-<!-- ``` -->
+ggsave("visualisations/marginal_probabilities.pdf", width=6, height=3, units="in")
+```
 
-<!-- Plot Black excursion sets by year: -->
-<!-- ```{r,results='hide',fig.keep='all'} -->
-<!-- plot.excursion.set.by.year(black.excursion.set.by.year, areas) -->
-<!-- ``` -->
+Excursion function with asterisks at 95% level.
+```{r plot-excursion-function, results='hide', fig.keep='all', echo=F}
 
-<!-- Fit k-models -->
-<!-- ```{r k-fits,results='hide',fig.keep='all'} -->
-<!-- ks <- c(0.001, 0.01, 0.1, 1) -->
+asian.F <- t(overall.ex.sets$asian.F)
 
-<!-- k.models <- fit.models.with.varying.k(ks, data) -->
-<!-- ``` -->
+colnames(asian.F) <- rownames(overall.ex.sets$asian.ratios)
+asian.all.upper <- asian.probs > 0.5
 
-
-<!-- Plot k-models -->
-<!-- ```{r plot-k-fits,results='hide',fig.keep='all'} -->
-<!-- temporal.plot.varying.k(k.models) -->
-<!-- ``` -->
-
-<!-- Compute k-excursions -->
-<!-- ```{r k-excursions,results='hide',fig.keep='all'} -->
-<!-- k.excursions <- lapply(k.models, function(model) compute.overall.excursion.sets(model, data)) -->
-<!-- k.excursions -->
-<!-- ``` -->
-
-<!-- Prior sensitivity -->
-<!-- ```{r alt-prior,results='hide',fig.keep='all'} -->
-<!-- alt.prior <- list(prior = "loggamma", params = c(2, 1)) -->
-
-<!-- model.alt.prior <- fit.single.model(data, iid_prior = alt.prior) -->
-
-<!-- plot.temporal(model.alt.prior) -->
-
-<!-- exsets.alt.prior <- compute.overall.excursion.sets(model.alt.prior, data) -->
-
-<!-- plot.overall.excursion.sets(exsets.alt.prior, areas) -->
-<!-- ``` -->
+areas$f <- asian.F[,areas$police_force]
+areas$upper <- asian.all.upper[areas$police_force]
+areas$fsigned <- areas$f * (2*areas$upper - 1)
 
 
-<!-- RW1: -->
-<!-- ```{r rw1,results='hide',fig.keep='all'} -->
+black.F <- t(overall.ex.sets$black.F)
 
-<!-- model.rw1 <- fit.single.model(data, time_model="rw1") -->
+colnames(black.F) <- rownames(overall.ex.sets$black.ratios)
+black.all.upper <- black.probs > 0.5
 
-<!-- plot.temporal(model.rw1) -->
+areas$fblack <- black.F[,areas$police_force]
+areas$upperblack <- black.all.upper[areas$police_force]
+areas$fsignedblack <- areas$fblack * (2*areas$upperblack - 1)
 
-<!-- exsets.rw1 <- compute.overall.excursion.sets(model.rw1, data) -->
 
-<!-- plot.overall.excursion.sets(exsets.rw1, areas) -->
-<!-- ``` -->
+asian.centroids <- areas %>%
+  filter(police_force %in% overall.ex.sets$asian.upr) %>%
+  st_centroid()
 
-<!-- AR1: -->
-<!-- ```{r ar1,results='hide',fig.keep='all'} -->
 
-<!-- model.ar1 <- fit.single.model(data, time_model="ar1") -->
+black.centroids <- areas %>%
+  filter(police_force %in% overall.ex.sets$black.upr) %>%
+  st_centroid()
 
-<!-- plot.temporal(model.ar1) -->
+p1 <- areas %>%
+  ggplot() +
+  geom_sf( aes(fill = fsigned)) +
+  geom_text(data = asian.centroids, aes(geometry = geometry, label = "*"), 
+            stat = "sf_coordinates", size = 8, color = "black", nudge_y = -0.15) +
+  ggtitle("A")
 
-<!-- exsets.ar1 <- compute.overall.excursion.sets(model.ar1, data) -->
+p2 <- ggplot(areas) + geom_sf(aes(fill = fsignedblack)) +
+  geom_text(data = black.centroids, aes(geometry = geometry, label = "*"), 
+            stat = "sf_coordinates", size = 8, color = "black", nudge_y=-0.1) +
+  ggtitle("B")
 
-<!-- plot.overall.excursion.sets(exsets.ar1, areas) -->
-<!-- ``` -->
+
+
+p1 + p2 + plot_layout(guides="collect") &
+  scale_fill_gradient2(low="blue",mid="white", high="red", name="Level avoiding\nfunction", limits=c(-1,1), midpoint=0, breaks=seq(-1, 1, 0.5), labels = abs(seq(-1, 1, 0.5)))&
+  theme_classic() &
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(size = rel(1.0), colour = "black"))
+
+
+ggsave("visualisations/excursion_function.pdf", width=6, height=3, units="in")
+
+```
+
 
 Posterior predictive checks
 ```{r post-pred-checks,results='hide',fig.keep='all'}
 replicates <- compute.replicates(model, data)
 plot.posterior.predictive.check(replicates)
+ggsave("visualisations/posterior_predictive.pdf", width=6, height=3, units="in")
 ```
 
-```{r}
-summary(as.vector(as.matrix(replicates)))
+```{r postpred2}
+plot.posterior.predictive.check(replicates)
+ggsave("visualisations/posterior_predictive.pdf", width=6, height=3, units="in")
 ```
 
-```{r,results='hide',fig.keep='all'}
-
-plot(model$summary.random$obs$mean, xlim=c(1100, 1200))
-
-data[1100:1200,]$force
-
-epsilons <- model$summary.random$obs %>%
-  mutate(ID = as.integer(ID)) %>%
-  arrange(ID) %>%
-  select(mean)
-
-epsilon.df <- data.frame(
-  epsilon = epsilons[which(data$force == "lancashire"), ],
-  ethnicity = data$ethnicity[which(data$force == "lancashire")],
-  year = data$year[which(data$force == "lancashire")],
-  crime = data$crime[which(data$force == "lancashire")]
-) %>%
-  mutate(
-    year = as.integer(substr(year, 1, 4)) + 1
-  )
-
-ggplot(epsilon.df, aes(x = year, y = epsilon, colour = str_to_title(crime), linetype = str_to_title(ethnicity))) +
-  geom_line() +
-  theme_classic() +
-  labs(
-    x = "Financial year beginning",
-    y = "Posterior mean of epsilon",
-    colour = "Crime type",
-    linetype = "Ethnicity"
-  )
-```
-
-
-```{r}
+```{r model-summary}
 model$summary.hyperpar
 ```
 
-```{r}
+```{r model-summary-latex}
+library(knitr)
+print(knitr::kable(model$summary.hyperpar %>% select(-c(sd, `0.5quant`, mode)),
+             format="latex",
+             digits = 2))
+```
+
+```{r model-summary-fixed}
+model$summary.fixed
+```
+
+```{r model-summary-kable}
+print(model$summary.hyperpar %>%
+  rownames_to_column("par") %>%
+  filter(startsWith(par, "Rho")) %>%
+  select(par, mean, `0.025quant`, `0.975quant`) %>%
+  knitr::kable(format="latex", digits=3))
+
+
+results <- model$summary.hyperpar %>%
+  select(-c(mean, sd, `0.5quant`, mode)) %>%
+  mutate(mean = unlist(lapply(model$marginals.hyperpar, function(m) inla.emarginal(function(x) 1/x, m) )),
+         q0.025 = 1 / `0.975quant`,
+         q0.975 = 1 / `0.025quant`
+  ) %>%
+  select(-c(`0.025quant`, `0.975quant`))
+
+
+print(results %>% knitr::kable(format = "latex", digits = 3))
+```
+
+```{r pc-sensitivity}
 models <- fit.models.sensitivity.pc.cor0(data)
 excursion.sets <- lapply(models, function(model) compute.overall.excursion.sets(model, data))
 ```
@@ -183,3 +202,141 @@ excursion.sets <- lapply(models, function(model) compute.overall.excursion.sets(
 ```{r}
 excursion.sets
 ```
+
+Age
+
+```{r age, results='hide'}
+age.data <- load.stop.search.data.age()
+age.model <- fit.age.model(age.data)
+age.exset <- compute.overall.excursion.sets(age.model, age.data)
+```
+
+```{r}
+age.exset
+```
+
+Default prior
+
+```{r default-prior, results = 'hide'}
+default.model <- fit.single.model(data, prec.prior = NULL, ar.prior = NULL)
+default.exset <- compute.overall.excursion.sets(default.model, data)
+```
+
+```{r}
+default.exset
+```
+
+K sensitivity
+
+```{r k-sensitivity, results='hide'}
+ks <- c(0.01)
+k.models <- lapply(ks, function(k) fit.single.model(data, k = k))
+k.exsets <- lapply(k.models, function(m) compute.overall.excursion.sets(m, data))
+```
+
+```{r}
+k.exsets
+```
+
+
+```{r k-sensitivity-2, results='hide'}
+ks.2 <- c(0.1)
+k.models.2 <- lapply(ks.2, function(k) fit.single.model(data, k = k))
+k.exsets.2 <- lapply(k.models.2, function(m) compute.overall.excursion.sets(m, data))
+```
+
+```{r}
+k.exsets.2
+```
+
+
+```{r k-sensitivity-3, results='hide'}
+k.models.3 <-  fit.single.model(data, k = 0.001)
+k.exsets.3 <- compute.overall.excursion.sets(k.models.3, data)
+```
+
+```{r}
+k.exsets.3
+```
+
+```{r plot-exset-map}
+final.results <- overall.ex.sets
+
+final.results$black.upr <- final.results$black.upr[final.results$black.upr != "greater_manchester"]
+
+plot.overall.excursion.sets(final.results, areas)
+
+ggsave("visualisations/overall_excursion_set.pdf", width=6, height=3, units="in")
+```
+
+```{r plot-final-results}
+plot.overall.excursion.sets <- function(excursion.sets, areas) {
+  
+  p1 <- areas %>%
+    mutate(
+      excursion.upr = police_force %in% excursion.sets$asian.upr,
+      excursion.lwr = police_force %in% excursion.sets$asian.lwr,
+      excursion = as.factor(excursion.upr - excursion.lwr)
+    ) %>%
+    ggplot() +
+    geom_sf(aes(fill = excursion)) +
+    theme_classic() +
+    theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank(),
+          legend.position = "none",
+          strip.background = element_blank(),
+          strip.text = element_text(size = rel(1.0), colour = "black")) +
+    scale_fill_manual(values = c("blue", "white", "red"), breaks = -1:1) +
+    ggtitle("Upper level avoiding sets for bias against Asian people (left)\n and Black people (right)")
+  
+  p2 <- areas %>%
+    mutate(
+      excursion.upr = police_force %in% excursion.sets$black.upr,
+      excursion.lwr = police_force %in% excursion.sets$black.lwr,
+      excursion = as.factor(excursion.upr - excursion.lwr)
+    ) %>%
+    ggplot() +
+    geom_sf(aes(fill = excursion)) +
+    theme_classic() +
+    theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank(),
+          legend.position = "none",
+          strip.background = element_blank(),
+          strip.text = element_text(size = rel(1.0), colour = "black")) +
+    scale_fill_manual(values = c("blue", "white", "red"), breaks = -1:1) 
+  
+  return(p1+p2 )
+} 
+
+
+```
+
+```{r map-probs-in-table}
+all.probs <- asian.probs %>%
+  as.data.frame() %>%
+  rownames_to_column()
+
+colnames(all.probs) <- c("police_force", "asian.probs")
+
+all.probs <- all.probs %>%
+  mutate(
+    asian.f = asian.F[,police_force],
+    asian.upr = ifelse(police_force %in% overall.ex.sets$asian.upr, "X", ""),
+    black.probs = black.probs[police_force],
+    black.f = black.F[,police_force],
+    black.upr = ifelse(police_force %in% overall.ex.sets$black.upr, "X", ""),
+    police_force = str_to_title(gsub("_", " ", police_force))
+  )
+
+require(knitr)
+
+print(knitr::kable(all.probs,
+             format = "latex",
+             col.names = c("Police Force", "Marginal probability", "Joint probability", "95% set", "Marginal probability", "Joint probability", "95% set"),
+             digits = 3))
+
+```
+
+

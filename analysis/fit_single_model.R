@@ -28,9 +28,9 @@ load.stop.search.data <- function() {
              force.idx = as.numeric(force),
              ethnicity.idx = ethnicity.indices[ethnicity],
              crime.idx = as.numeric(crime),
-             yyear = year,
-             yyyear = year,
-             yyyyear = year
+             year.ethnicity = year,
+             year.crime = year,
+             year.force = year
            ))
 }
 
@@ -70,7 +70,7 @@ get.eth.year.lincomb <- function(data) {
   
   lin.combs.eth.year <- inla.make.lincombs(
     ethnicity = weights.eth,
-    yyear = weights.eth.year
+    year.ethnicity = weights.eth.year
   )
   
   return( lin.combs.eth.year )
@@ -89,9 +89,9 @@ fit.single.model<- function(data,
                   f(force, constr=T, hyper = prec.prior) + 
                   f(crime, constr=T, hyper = prec.prior) +
                   f(year, model = "ar1", constr=T, hyper = ar.prior) +
-                  f(yyear, model = "ar1", group = ethnicity.idx, constr=T, hyper = ar.prior) +
-                  f(yyyear, model = "ar1", group = force.idx, constr=T, hyper = ar.prior) +
-                  f(yyyyear, model = "ar1", group = crime.idx, constr=T, hyper = ar.prior) +
+                  f(year.ethnicity, model = "ar1", group = ethnicity.idx, constr=T, hyper = ar.prior) +
+                  f(year.force, model = "ar1", group = force.idx, constr=T, hyper = ar.prior) +
+                  f(year.crime, model = "ar1", group = crime.idx, constr=T, hyper = ar.prior) +
                   f(interaction(ethnicity, force), constr=T, hyper = prec.prior) +
                   f(interaction(force, crime), constr=T, hyper = prec.prior) + 
                   f(interaction(ethnicity, crime), constr=T, hyper = prec.prior) +

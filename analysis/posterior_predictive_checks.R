@@ -35,7 +35,8 @@ plot.posterior.predictive.check <- function(replicates) {
     geom_histogram(aes(x = sd, colour = "Replicates")) +
     geom_vline(aes(xintercept = sd(data$stops), colour = "Real")) +
     labs(
-      x = "Std. deviation"
+      x = "Std. deviation",
+      title = "A"
     ) 
   
   p2 <- post.pred %>%
@@ -43,16 +44,19 @@ plot.posterior.predictive.check <- function(replicates) {
     geom_histogram(aes(x = max, colour = "Replicates")) +
     geom_vline(aes(xintercept = max(data$stops), colour = "Real")) +
     labs(
-      x = "Maximum"
-    ) 
+      x = "Maximum",
+      title= "B"
+    ) +
+    scale_x_continuous(breaks=c(63000, 64000, 65000))
   
   p3 <- post.pred %>%
     ggplot() +
     geom_histogram(aes(x = kurtosis, colour = "Replicates")) +
     geom_vline(aes(xintercept = kurtosis(data$stops), colour = "Real")) +
     labs(
-      x = "Kurtosis"
-    ) 
+      x = "Kurtosis",
+      title= "C"
+    )  
   
   
   p4 <- post.pred %>%
@@ -60,7 +64,8 @@ plot.posterior.predictive.check <- function(replicates) {
     geom_histogram(aes(x = skewness, colour = "Replicates")) +
     geom_vline(aes(xintercept = skewness(data$stops), colour = "Real")) +
     labs(
-      x = "Skewness"
+      x = "Skewness",
+      title="D"
     ) +
     scale_x_continuous(breaks = c(11.1, 11.2, 11.3))
   
