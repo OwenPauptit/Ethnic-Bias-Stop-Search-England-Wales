@@ -1,6 +1,6 @@
-
 library(stringr)
 
+# Compute the posterior ratio of stop rate for ethnic minorities / stop rate for White people for every combination of police force and financial year
 compute.ratios.over.force.and.year <- function(model) {
   
   samples.force.year <- inla.posterior.sample(n = 10000, 
@@ -15,6 +15,7 @@ compute.ratios.over.force.and.year <- function(model) {
                                                    rownames_to_column("id") %>%
                                                    pivot_wider(names_from = id, values_from = V1))) 
   
+  # Complicated reformatting of dataframe
   results.force.year <- samples.force.year.df %>%
     rownames_to_column("iter") %>%
     pivot_longer(starts_with("ethnicity"), names_to = "ethnicity", values_to = "eth_val") %>% 
@@ -43,104 +44,7 @@ compute.ratios.over.force.and.year <- function(model) {
   return(results.force.year)
 }
 
-# Ignoring for now
-# ###############
-# 
-# # TEMPORAL PLUS EXCURSION SET (ASIAN)
-# 
-# summarised.results.force.year <- results.force.year %>%
-#   group_by(force, year) %>%
-#   mutate(asian = exp(asian_log_ratio),
-#          black = exp(black_log_ratio)) %>%
-#   summarise(
-#     asian_LB = quantile(asian, 0.025),
-#     asian_mean = mean(asian),
-#     asian_UB = quantile(asian, 0.975),
-#     black_LB = quantile(black, 0.025),
-#     black_mean = mean(black),
-#     black_UB = quantile(black, 0.975)
-#   )
-# 
-# p1 <- summarised.results.force.year %>%
-#   filter(force %in% c("lancashire", "north_yorkshire", "west_midlands"))%>%
-#   ggplot(aes(x = year, y = asian_mean)) + 
-#   geom_line() + 
-#   geom_errorbar(aes(ymin = asian_LB, ymax = asian_UB)) + 
-#   geom_hline(yintercept = 1, colour = "red") +
-#   facet_wrap(vars( str_to_title(gsub("_", " ",force))), nrow=3) +
-#   theme_classic() +
-#   theme(
-#     strip.background = element_blank(),
-#     strip.text = element_text(size = rel(1.0), colour = "black")
-#   ) +
-#   labs(
-#     x = "Financial year",
-#     y = "Posterior ratio"
-#   )
-# 
-# p2 <- areas %>%
-#   mutate(
-#     excursion = police_force %in% c("lancashire", "north_yorkshire", "west_midlands")
-#   ) %>%
-#   ggplot() +
-#   geom_sf(aes(fill = excursion)) +
-#   theme_classic() +
-#   theme(axis.line = element_blank(),
-#         axis.text = element_blank(),
-#         axis.ticks = element_blank(),
-#         legend.position = "none",
-#         strip.background = element_blank(),
-#         strip.text = element_text(size = rel(1.0), colour = "black")) +
-#   scale_fill_manual(values = c("white", "red"))
-# 
-# p1 + p2
-# 
-# ggsave("visualisations/posterior_ratio_exset_and_temporal.pdf", width=6, height=3, units="in")
-# 
-# ##############
-# 
-# # Temporal Plus excursion (black)
-# 
-# p1 <- summarised.results.force.year %>%
-#   filter(force %in% c("lancashire"))%>%
-#   ggplot(aes(x = year, y = black_mean)) + 
-#   geom_line() + 
-#   geom_errorbar(aes(ymin = black_LB, ymax = black_UB)) + 
-#   geom_hline(yintercept = 1, colour = "red") +
-#   facet_wrap(vars( str_to_title(gsub("_", " ",force))), nrow=3) +
-#   theme_classic() +
-#   theme(
-#     strip.background = element_blank(),
-#     strip.text = element_text(size = rel(1.0), colour = "black")
-#   ) +
-#   labs(
-#     x = "Financial year",
-#     y = "Posterior ratio"
-#   )
-# 
-# p2 <- areas %>%
-#   mutate(
-#     excursion = police_force %in% c("lancashire")
-#   ) %>%
-#   ggplot() +
-#   geom_sf(aes(fill = excursion)) +
-#   theme_classic() +
-#   theme(axis.line = element_blank(),
-#         axis.text = element_blank(),
-#         axis.ticks = element_blank(),
-#         legend.position = "none",
-#         strip.background = element_blank(),
-#         strip.text = element_text(size = rel(1.0), colour = "black")) +
-#   scale_fill_manual(values = c("white", "red"))
-# 
-# p1 + p2
-# 
-# ggsave("visualisations/posterior_ratio_exset_and_temporal_black.pdf", width=6, height=3, units="in")
-# 
-# ############
-
-# Exsets by year (ASian)
-
+## Compute and plot excursion sets for each financial year
 compute.asian.excursion.sets.by.year <- function(ratios.by.force.and.year) {
   asian_ratios_by_year <- lapply(2016:2023,
                                  function(yr) ratios.by.force.and.year %>% 

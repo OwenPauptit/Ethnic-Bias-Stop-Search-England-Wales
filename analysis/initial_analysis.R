@@ -1,6 +1,3 @@
-
-# Temporal plot
-
 plot.temporal <- function(model) {
   lincomb.result <- lapply(model$marginals.lincomb.derived,
                            function(m) as.data.frame(inla.zmarginal(inla.tmarginal(exp, m))))

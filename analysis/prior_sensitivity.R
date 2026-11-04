@@ -1,5 +1,4 @@
-# source("analysis/fit_single_model.R")
-# source("analysis/initial_analysis.R")
+## Various types of priors to make automation easier
 
 pc.prec <- function(sigma, alpha) {
   return(list(prior = "pc.prec", param = c(sigma, alpha)))
@@ -18,10 +17,7 @@ ar.prior <- function(sigma, sigma.alpha, rho, rho.alpha, base.rho.zero = T) {
               rho = list(prior = "pc.cor1", param = c(rho, rho.alpha))))
 }
 
-# Default priors.
-# Cor1 for AR
-# PC with small and large
-
+## Test sensitivity to a variety of PC priors
 fit.models.sensitivity.pc.cor0 <- function(data) {
   
   alpha <- 0.9

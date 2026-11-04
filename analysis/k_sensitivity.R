@@ -1,4 +1,5 @@
-
+## K is the offset for arrests to ensure the model is well defined when the number of arrests is 0
+## Here, we test sensitivity to the choice of K
 fit.models.with.varying.k <- function(ks, data) {
   models.with.varying.k <- lapply(ks, function(k) fit.single.model(data, k = k))
   return(models.with.varying.k)
@@ -43,65 +44,4 @@ temporal.plot.varying.k <- function(models.with.varying.k) {
   
   return(p)
 }
-
-
-# 
-# ###########
-# 
-# # K excursions
-# compute.excursion.sets.with.varying.k <- function(models.with.varying.k, data) {
-#   
-#   
-#   excursion.sets <- lapply(models, function(model) compute.overall.excursion.sets(model, data))
-#   
-#   k.samples <- lapply(models.with.varying.k,
-#                       function(k_fit) inla.posterior.sample(n = 10000, 
-#                                                             k_fit, 
-#                                                             selection = list(ethnicity = 0,
-#                                                                              `interaction(ethnicity, force)` = 0)))
-#   
-#   k.samples.df <- lapply(k.samples,
-#                          function(k.sample) do.call(rbind, lapply(k.sample, function(sample) sample$latent %>%
-#                                                                     as.data.frame() %>%
-#                                                                     rownames_to_column("id") %>%
-#                                                                     pivot_wider(names_from = id, values_from = V1))))
-#   
-#   
-#   k.results <- lapply(k.samples.df, function(k.sample.df) k.sample.df %>%
-#                         rownames_to_column("iter") %>%
-#                         pivot_longer(starts_with("ethnicity"), names_to = "ethnicity", values_to = "eth_val") %>% 
-#                         pivot_longer(starts_with("interaction(ethnicity, force"), names_to = "ethforce", values_to = "ethforce_val") %>%
-#                         mutate(ethnicity =as.integer(str_extract(ethnicity, "\\d")),
-#                                ethforce = as.integer(str_extract(ethforce, "\\d+"))) %>%
-#                         filter(
-#                           ethnicity == (ethforce - 1) %% 3 + 1
-#                         ) %>%
-#                         mutate(
-#                           rate = eth_val +  ethforce_val,
-#                           ethnicity = c("Asian", "Black", "White")[ethnicity],
-#                           force = levels(data$force)[(ethforce - 1) %/% 3 + 1]
-#                         ) %>%
-#                         group_by(iter, force) %>%
-#                         summarise(asian_log_ratio = rate[ethnicity == "Asian"] - rate[ethnicity == "White"],
-#                                   black_log_ratio = rate[ethnicity == "Black"] - rate[ethnicity == "White"]) )
-#   
-#   k.ready.for.excursion.asian <- lapply(k.results, function(k.result) 
-#     k.result %>% 
-#       select(-black_log_ratio) %>%
-#       mutate(iter = as.integer(iter)) %>%
-#       arrange(iter) %>%
-#       pivot_wider(names_from = iter, values_from = asian_log_ratio) %>%
-#       column_to_rownames("force")
-#   )
-#   
-#   k.excursion.asian <- lapply(k.ready.for.excursion.asian, function(df)
-#     rownames(df)[as.logical((df %>%
-#                                excursions.mc(
-#                                  alpha = 0.05,
-#                                  u = 0,
-#                                  type = ">"
-#                                ))$E)])
-#   
-#   return(k.excursion.asian)
-# }
 
